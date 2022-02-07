@@ -279,8 +279,10 @@ for (i in seq(0, as.numeric(my_interv_means_sub[length(my_interv_means_sub[,1]),
 6. Print the second plot
 
 ```r
-# print(my_plt_sub)
+print(my_plt_sub)
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-14-1.png)<!-- -->
 <br>
 <h3><span style="text-align: center; font-weight : bold;">V. The 5-minute interval that, on average, contains the maximum number of steps</span></h3>
 

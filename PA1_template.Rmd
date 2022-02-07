@@ -1,6 +1,6 @@
 ---
 title: |
-  | Data from a personal activity monitoring device
+  | Data from a personal activity monitoring devices
   | Report
 author: "Idriss .S"
 date: "2/6/2022"

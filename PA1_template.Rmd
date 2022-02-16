@@ -51,22 +51,29 @@ There is `r nlevels(my_data$date)` days in <span style="color: red;font-weight :
 my_sum <- aggregate(steps ~ date, na.action = NULL, data = my_data, FUN = sum, na.rm=TRUE)
 ```
 
-4. Plot <span style="color: red;font-weight : bold;">my_sum</span> into a histogram
+4. Function for plots
+```{r}
+my_plot_fun <- function(my_data) {
+  my_data %>% ggplot() +
+  theme_linedraw() +
+    theme(
+   plot.title = element_text(color="red", size=18, face="bold.italic",hjust=0.5),
+   axis.title.x = element_text(color="#993333", size=18, face="bold"),
+   axis.text.x = element_text(color="#993333", size=12, angle = 90,vjust = 0.5, hjust=1),
+   axis.title.y = element_text(color="darkgreen", size=18, face="bold"),
+   axis.text.y = element_text(face="bold", color="darkgreen", size=16),
+   legend.text = element_text(size=12),
+   ) +
+    theme(legend.position = "bottom")
+}
+```
+5. Plot <span style="color: red;font-weight : bold;">my_sum</span> into a histogram
 
 ```{r fig.width=10, fig.height=10}
-my_hist <- my_sum %>%
- ggplot(aes(x=date, y=steps, fill=date)) +
- geom_bar(stat="identity",color="black",alpha=0.6)+
- xlab("Day") + ylab("Steps") +
-theme(
- plot.title = element_text(color="red", size=24, face="bold.italic",hjust=0.5),
- axis.title.x = element_text(color="#993333", size=20, face="bold"),
- axis.text.x = element_text(color="#993333", size=10, angle = 90,vjust = 0.5, hjust=1),
- axis.title.y = element_text(color="darkgreen", size=20, face="bold"),
- axis.text.y = element_text(face="bold", color="darkgreen", size=14),
- legend.text = element_text(size=12)
-)
-print(my_hist + plot_layout(guides = "collect" )& theme(legend.position = "bottom"))
+my_hist <- my_plot_fun(my_sum) +
+ geom_bar(aes(x=date, y=steps, fill=date), stat="identity", color="black", alpha=0.5)+
+ xlab("Day") + ylab("Steps")
+print(my_hist)
 ```
 
 <br>
@@ -99,103 +106,44 @@ my_interv_means <- aggregate(steps ~ interval, na.action = NULL, data = my_data,
 my_interv_means$interval <- as.numeric(levels(my_data$interval))
 ```
 
-2. Define some useful object
-```{r}
-# Data frame to store values
-my_tmp<-data.frame(interval = integer(),
-                   steps = numeric())
-# Vector for colors
-red_value = green_value = 1
-
-# Initializing a ggplot graph
-my_plt <- ggplot() + ggtitle("One plot per hour") + 
-  theme(plot.title = element_text(size = 10, hjust=0.5))
-# Maximum normalization for the y-axis
-my_y_lim <- ylim(0,max(my_interv_means[,2]))
-```
-
-3. With ```for``` a loop, subset the object <span style="color: red;font-weight : bold;">my_interv_means</span> into 24 groups : one by hour, then create a ggplot object and store it in <span style="color: red;font-weight : bold;">my_plt</span> by successive addition. Each plot contains the average number of steps in every hour.
+2. Construction of the plot by using the object  <span style="color: red;font-weight : bold;">my_interv_means</span> :
 ```{r }
-for (i in seq(0, as.numeric(my_interv_means[length(my_interv_means[,1]),1]), by=100)){
-  for (j in 1:length(my_interv_means[,1])){
-    if (my_interv_means[j,1]>=i & my_interv_means[j,1]<=i+55){
-      my_tmp %<>% add_row(my_interv_means[j,])
-    }
-  }
-
-  my_hist <- my_tmp %>%
-    ggplot(aes(x = interval, y = steps)) +
-    geom_bar(stat="identity",color=rgb(red_value,green_value,0.6)) +
-
-    # The xlim is extended to include bordering values, that's why there is " - 6" and " + 6"
-    my_y_lim+
-    theme (
-      axis.text.x = element_text(color = "#993333", size=10, angle = 90, vjust = 0.5, hjust=1),
-    )
-
-  my_plt <- my_plt + my_hist
-  green_value = green_value - 0.01
-  red_value = red_value - 0.02
-
-  # Subset storage object reset
-  my_tmp<-data.frame(interval = integer(),
-                     steps = numeric())
-}
+my_plt <- my_plot_fun(my_interv_means) +
+  geom_line(aes(x=interval, y=steps), size = 2) +
+  ggtitle("Time series plot of the average number of steps taken")
 ```
-4. Print the plot
+3. Print the plot
 ```{r fig.width=10, fig.height=12}
 print(my_plt)
 ```
 
-5. Another case can be when interval with a number of steps less than 5 are deleted.
+4. Another case can be when interval with a number of steps less than 5 are deleted.
 ```{r}
 my_subset_data <- my_data %>% filter(steps > 4)
 my_interv_means_sub <- aggregate(steps ~ interval, na.action = NULL, data = my_subset_data, FUN = mean, na.rm=TRUE)
 my_interv_means_sub <- droplevels(my_interv_means_sub)
 my_interv_means_sub$interval <- as.numeric(levels(my_interv_means_sub$interval))
 
-# Data frame to store values
-my_tmp<-data.frame(interval = integer(),
-                   steps = numeric())
-# Vector for colors
-red_value = green_value = 1
-
-# Initializing a ggplot graph
-my_plt_sub <- ggplot() + ggtitle("One plot per hour") +
-  theme(plot.title = element_text(size = 10, hjust=0.5))
-# Maximum normalization for the y-axis
-my_y_lim <- ylim(0,max(my_interv_means_sub[,2]))
-
-
-for (i in seq(0, as.numeric(my_interv_means_sub[length(my_interv_means_sub[,1]),1]), by=100)){
-  for (j in 1:length(my_interv_means_sub[,1])){
-    if (my_interv_means_sub[j,1]>=i & my_interv_means_sub[j,1]<=i+55) {
-      my_tmp %<>% add_row(my_interv_means_sub[j,])
-    }
-  }
-
-  my_hist <- my_tmp %>%
-    ggplot(aes(x = interval, y = steps)) +
-    geom_bar(stat="identity",color=rgb(red_value,green_value,0.6)) +
-
-    # The xlim is extended to include bordering values, that's why there is " - 6" and " + 6"
-    my_y_lim+
-    theme (
-      axis.text.x = element_text(color = "#993333", size=10, angle = 90, vjust = 0.5, hjust=1),
-    )
-
-  my_plt_sub <- my_plt_sub + my_hist
-  green_value = green_value - 0.01
-  red_value = red_value - 0.02
-
-  # Subset storage object reset
-  my_tmp<-data.frame(interval = integer(),
-                     steps = numeric())
-}
+# Plot with ggplot
+my_plt_sub <- my_plot_fun(my_interv_means_sub) +
+  geom_line(aes(x=interval, y=steps), size = 2) +
+  ggtitle("Time series plot of the average number of steps taken with subset")
 ```
-6. Print the second plot
+5. Print the second plot
 ```{r fig.width=10, fig.height=12}
 print(my_plt_sub)
+```
+6. Superposition of the two last plots
+```{r fig.width=10, fig.height=12}
+my_superposed_plot <-
+  my_plot_fun(my_interv_means) +
+    geom_line(aes(x=interval, y=steps, colour="All steps kept")) +
+    geom_line(data = my_interv_means_sub, aes(x=interval, y=steps, colour="Steps less than 5 are deleted"),
+              color = "red") +
+    scale_color_manual(name = "Steps", values = c("All steps kept" = "black", "Steps less than 5 are deleted" = "red")) + theme(legend.position = "bottom") +
+   ggtitle("Two time series plots of the average number of steps taken with subset")
+
+print(my_superposed_plot)
 ```
 <br>
 <h3><span style="text-align: center; font-weight : bold;">V. The 5-minute interval that, on average, contains the maximum number of steps</span></h3>
@@ -235,21 +183,19 @@ my_sum_bis <- aggregate(steps ~ date, na.action = NULL, data = my_data, FUN = su
 3. Plot <span style="color: red;font-weight : bold;">my_sum_bis</span> into a histogram
 <span style="color: black;font-weight : bold;">The graph below is exactly the same as the one provide in II. 4.</span>
 ```{r fig.width=10, fig.height=10}
-my_hist <- my_sum_bis %>%
- ggplot(aes(x=date, y=steps, fill=date)) +
- geom_bar(stat="identity",color="black",alpha=0.6)+
- xlab("Day") + ylab("Steps") +
-theme(
- plot.title = element_text(color="red", size=24, face="bold.italic",hjust=0.5),
- axis.title.x = element_text(color="#993333", size=20, face="bold"),
- axis.text.x = element_text(color="#993333", size=10, angle = 90,vjust = 0.5, hjust=1),
- axis.title.y = element_text(color="darkgreen", size=20, face="bold"),
- axis.text.y = element_text(face="bold", color="darkgreen", size=14),
- legend.text = element_text(size=12)
-)
-print(my_hist + plot_layout(guides = "collect" )& theme(legend.position = "bottom"))
+my_hist_2 <- my_plot_fun(my_sum_bis) +
+ geom_bar(aes(x=date, y=steps, fill=date), stat="identity",color="black",alpha=0.6)+
+ xlab("Day") + ylab("Steps")
+print(my_hist_2)
 ```
 
+4. Another kind of plot with same data
+```{r fig.width=10, fig.height=10}
+my_plot_2 <- my_plot_fun(my_sum_bis) +
+ geom_line(aes(x=date, y=steps, group = 1),color="black") +
+ xlab("Day") + ylab("Steps") + theme(legend.position = "bottom")
+print(my_plot_2)
+```
 <br>
 <h3><span style="text-align: center; font-weight : bold;">VIII. Panel plot comparing the average number of steps taken per 5-minute interval across weekdays and weekends</span></h3>
 
@@ -259,121 +205,83 @@ my_data$date <- ymd(my_data$date)
 print(class(my_data$date))
 ```
 
-2. Define some useful object
-```{r}
-# Data frame to store values
-my_tmp <- data.frame(interval = integer(),
-                     steps = numeric())
-my_data_weekDAYS<- data.frame(steps = numeric(),
-                               date = POSIXct(),
-                               interval = integer())
-my_data_weekENDS <- data.frame(steps = numeric(),
-                               date = POSIXct(),
-                               interval = integer())
-
-                               
-# Vector for colors
-red_value = green_value = 1
-
-# Initializing two ggplot graphs
-my_plt_weekDAYS <- ggplot() + ggtitle("One plot per hour") + 
-  theme(plot.title = element_text(size = 10, hjust=0.5))
-my_plt_weekENDS <- ggplot() + ggtitle("One plot per hour") + 
-  theme(plot.title = element_text(size = 10, hjust=0.5))
-```
-
-3. Select and store in the object <span style="color: red;font-weight : bold;">my_data_weekDAYS</span> the weekdays by using the function ```wday()```.
+2. Select and store in the object <span style="color: red;font-weight : bold;">my_data_weekDAYS</span> the weekdays by using the function ```wday()```.
 ```{r }
 my_data_weekDAYS <- my_data[wday(my_data$date) %in% seq(1,5,1),]
 ```
 
-4. Define the variable <span style="color: blue;font-weight : bold;">interval</span> as factor for <span style="color: red;font-weight : bold;">my_data_weekDAYS</span>. Then, create a new object <span style="color: red;font-weight : bold;">my_interv_weekDAYS_means</span> which contains the mean across the 61 days for each interval by using the function ```agregate()```.
+3. Define the variable <span style="color: blue;font-weight : bold;">interval</span> as factor for <span style="color: red;font-weight : bold;">my_data_weekDAYS</span>. Then, create a new object <span style="color: red;font-weight : bold;">my_interv_weekDAYS_means</span> which contains the mean across the 61 days for each interval by using the function ```agregate()```.
 ```{r}
 my_data_weekDAYS$interval <- as.factor(my_data_weekDAYS$interval)
 my_interv_weekDAYS_means <- aggregate(steps ~ interval, na.action = NULL, data = my_data_weekDAYS, FUN = mean, na.rm=TRUE)
 my_interv_weekDAYS_means$interval <- as.numeric(levels(my_interv_weekDAYS_means$interval))
-# Maximum normalization for the y-axis
-my_y_lim <- ylim(0,max(my_interv_weekDAYS_means[,2]))
 ```
 
-5. With a ```for``` loop, subset the object <span style="color: red;font-weight : bold;">my_interv_weekDAYS_means</span> into 24 groups : one by hour. Then, create a ggplot object and store it in <span style="color: red;font-weight : bold;">my_plt_weekDAYS</span> by successive addition. Each plot contains the average number of steps in every hour for weekdays only.
-```{r }
-for (i in seq(0, as.numeric(my_interv_weekDAYS_means[length(my_interv_weekDAYS_means[,1]),1]), by=100)) {
-    for (j in 1:length(my_interv_weekDAYS_means[,1])){
-      if (my_interv_weekDAYS_means[j,1]>=i & my_interv_weekDAYS_means[j,1]<=i+55){
-        my_tmp %<>% add_row(my_interv_weekDAYS_means[j,])
-      }
-    }
-    my_hist <- my_tmp %>%
-      ggplot(aes(x = interval, y = steps)) +
-      geom_bar(stat="identity",color=rgb(red_value,green_value,0.6)) +
-  
-      # The xlim is extended to include bordering values, that's why there is " - 6" and " + 6"
-      my_y_lim+
-      theme (
-        axis.text.x = element_text(color = "#993333", size=10, angle = 90, vjust = 0.5, hjust=1),
-      )
-  
-    my_plt_weekDAYS <- my_plt_weekDAYS + my_hist
-    green_value = green_value - 0.01
-    red_value = red_value - 0.02
-  
-    # Subset storage object reset
-    my_tmp <- data.frame(interval = integer(),
-                       steps = numeric())
-}
-```
-
-6. Select and store in the object <span style="color: red;font-weight : bold;">my_data_weekENDS</span> the weekends by using the function ```wday()```.
+4. Select and store in the object <span style="color: red;font-weight : bold;">my_data_weekENDS</span> the weekends by using the function ```wday()```.
 ```{r }
 my_data_weekENDS <- my_data[wday(my_data$date) %in% seq(6,7,1),]
 ```
 
-7. Define the variable <span style="color: blue;font-weight : bold;">interval</span> as factor for <span style="color: red;font-weight : bold;">my_data_weekENDS</span>. Then, create a new object <span style="color: red;font-weight : bold;">my_interv_weekENDS_means</span> which contains the mean across the 61 days for each interval by using the function ```agregate()```.
+5. Define the variable <span style="color: blue;font-weight : bold;">interval</span> as factor for <span style="color: red;font-weight : bold;">my_data_weekENDS</span>. Then, create a new object <span style="color: red;font-weight : bold;">my_interv_weekENDS_means</span> which contains the mean across the 61 days for each interval by using the function ```agregate()```.
 ```{r}
 my_data_weekENDS$interval <- as.factor(my_data_weekENDS$interval)
 my_interv_weekENDS_means <- aggregate(steps ~ interval, na.action = NULL, data = my_data_weekENDS, FUN = mean, na.rm=TRUE)
 my_interv_weekENDS_means$interval <- as.numeric(levels(my_interv_weekENDS_means$interval))
-# Maximum normalization for the y-axis
-my_y_lim <- ylim(0,max(my_interv_weekENDS_means[,2]))
+```
+6. With the objects <span style="color: red;font-weight : bold;">my_interv_weekDAYS_means</span> and <span style="color: red;font-weight : bold;">my_interv_weekENDS_means</span>, making of two superposed plots.
+```{r fig.width=10, fig.height=12}
+my_superposed_plot_2 <-
+  my_plot_fun(my_interv_weekDAYS_means) +
+    geom_line(aes(x=interval, y=steps, colour="Weekdays")) +
+    geom_line(data = my_interv_weekENDS_means, aes(x=interval, y=steps, colour="Weekends"),  color = "red") +
+    scale_color_manual(name = "Steps", values = c("Weekdays" = "black", "Weekends" = "red")) + theme(legend.position = "bottom") +
+   ggtitle("Comparaison between weekdays and weekends.")
 ```
 
-8. With a ```for``` loop, subset the object <span style="color: red;font-weight : bold;">my_interv_weekENDS_means</span> into 24 groups : one by hour. Then, create a ggplot object and store it in <span style="color: red;font-weight : bold;">my_plt_weekENDS</span> by successive addition. Each plot contains the average number of steps in every hour for weekends only.
-```{r }
-for (i in seq(0, as.numeric(my_interv_weekENDS_means[length(my_interv_weekENDS_means[,1]),1]), by=100)) {
-    for (j in 1:length(my_interv_weekENDS_means[,1])){
-      if (my_interv_weekENDS_means[j,1]>=i & my_interv_weekENDS_means[j,1]<=i+55){
-        my_tmp %<>% add_row(my_interv_weekENDS_means[j,])
-      }
-    }
-    my_hist <- my_tmp %>%
-      ggplot(aes(x = interval, y = steps)) +
-      geom_bar(stat="identity",color=rgb(red_value,green_value,0.6)) +
-  
-      # The xlim is extended to include bordering values, that's why there is " - 6" and " + 6"
-      my_y_lim +
-      theme (
-        axis.text.x = element_text(color = "#993333", size=10, angle = 90, vjust = 0.5, hjust=1),
-      )
-  
-    my_plt_weekENDS <- my_plt_weekENDS + my_hist
-    green_value = green_value - 0.01
-    red_value = red_value - 0.02
-  
-    # Subset storage object reset
-    my_tmp <- data.frame(interval = integer(),
-                       steps = numeric())
-}
-``` 
-
-9. Print plots
+7. Print plots
 ```{r fig.width=10, fig.height=12}
-print(my_plt_weekDAYS)
-print(my_plt_weekENDS)
+print(my_superposed_plot_2)
 ```
 
 10. Another case can be when interval with a number of steps less than 5 are deleted.
 ```{r}
+
+
+# Subset only the interval with unless 5 steps every 5 minutes
+my_subset_data <- my_data %>% filter(steps > 4)
+my_data_weekDAYS_sub <- my_subset_data[wday(my_subset_data$date) %in% seq(1,5,1),]
+my_data_weekENDS_sub <- my_subset_data[wday(my_subset_data$date) %in% seq(6,7,1),]
+
+# Calculation of the weekdays
+my_data_weekDAYS_sub$interval <- as.factor(my_data_weekDAYS_sub$interval)
+my_interv_weekDAYS_means_sub <- aggregate(steps ~ interval, na.action = NULL, data = my_data_weekDAYS_sub, FUN = mean, na.rm=TRUE)
+my_interv_weekDAYS_means_sub <- droplevels(my_interv_weekDAYS_means_sub)
+my_interv_weekDAYS_means_sub$interval <- as.numeric(levels(my_interv_weekDAYS_means_sub$interval))
+
+# Calculation of the weekends
+my_data_weekENDS_sub$interval <- as.factor(my_data_weekENDS_sub$interval)
+my_interv_weekENDS_means_sub <- aggregate(steps ~ interval, na.action = NULL, data = my_data_weekENDS_sub, FUN = mean, na.rm=TRUE)
+my_interv_weekENDS_means_sub <- droplevels(my_interv_weekENDS_means_sub)
+my_interv_weekENDS_means_sub$interval <- as.numeric(levels(my_interv_weekENDS_means_sub$interval))
+
+
+my_superposed_plot_3 <-
+  my_plot_fun(my_interv_weekDAYS_means_sub) +
+    geom_line(aes(x=interval, y=steps, colour="Weekdays")) +
+      geom_line(data = my_interv_weekENDS_means_sub, aes(x=interval, y=steps, colour="Weekends"),  color = "red") +
+    scale_color_manual(name = "Steps", values = c("Weekdays" = "black", "Weekends" = "red")) + theme(legend.position = "bottom") +
+   ggtitle("Comparaison between weekdays and weekends with subset.")
+
+
+```
+
+11. Print the two other plots
+```{r fig.width=10, fig.height=8}
+print(my_superposed_plot_3)
+```
+<br>
+12. EXTRA : comparison between weekdays and weekend per hour
+```{r fig.width=4, fig.height=5}
 
 # Data frame to store values
 my_tmp <- data.frame(interval = integer(),
@@ -467,20 +375,11 @@ for (i in seq(0, as.numeric(my_interv_weekENDS_means_sub[length(my_interv_weekEN
     my_tmp <- data.frame(interval = integer(),
                        steps = numeric())
 }
-```
 
-11. Print the two other plots
-```{r fig.width=10, fig.height=12}
-print(my_plt_weekDAYS_sub)
-print(my_plt_weekENDS_sub)
-```
-<br>
-12. EXTRA : Comparison between weekdays and weekend per hour
-```{r fig.width=4, fig.height=5}
 for (i in 2:25) {
   my_tmp_plt <- (my_plt_weekDAYS_sub[[i]] + ggtitle("Weekdays",) + theme(plot.title = element_text(hjust = 0.5)) +
                    my_plt_weekENDS_sub[[i]] + ggtitle("Weekends")) + theme(plot.title = element_text(hjust = 0.5)) +
-      plot_annotation(title = paste("Hour number :",i-1,sep=" "))
+      plot_annotation(title = paste("Hour number :",i-1,sep=" ")) + theme_linedraw() + theme(legend.position = "bottom")
   print(my_tmp_plt)
 }
 ```

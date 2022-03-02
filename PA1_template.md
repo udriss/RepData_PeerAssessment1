@@ -228,7 +228,7 @@ my_superposed_plot <-
     geom_line(data = my_interv_means_sub, aes(x=interval, y=steps, colour="Steps less than 5 are deleted"),
               color = "red") +
     scale_color_manual(name = "Steps", values = c("All steps kept" = "black", "Steps less than 5 are deleted" = "red")) + theme(legend.position = "bottom") +
-   ggtitle("Two time series plots of the average number of steps taken with subset")
+   ggtitle("Two time series plots of the average number of steps taken without and with subset")
 
 print(my_superposed_plot)
 ```
@@ -350,23 +350,40 @@ my_interv_weekENDS_means$interval <- as.numeric(levels(my_interv_weekENDS_means$
 6. With the objects <span style="color: red;font-weight : bold;">my_interv_weekDAYS_means</span> and <span style="color: red;font-weight : bold;">my_interv_weekENDS_means</span>, making of two superposed plots.
 
 ```r
+my_panel_plot_1 <-
+  my_plot_fun(my_interv_weekDAYS_means) +
+    geom_line(aes(x=interval, y=steps, colour="Weekdays")) +
+  my_plot_fun(my_interv_weekENDS_means) +
+    geom_line(aes(x=interval, y=steps, colour="Weekends"),  color = "black") +
+    scale_color_manual(name = "Steps", values = c("Weekdays" = "black", "Weekends" = "red")) + theme(legend.position = "bottom") + plot_annotation(title = "Panel plot : weekdays and weekends.",
+    theme = theme(plot.title = element_text(color="red", size=18, face="bold.italic",hjust=0.5)))
+```
+
+7. Print panel plots
+
+```r
+print(my_panel_plot_1)
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-27-1.png)<!-- -->
+
+8. We can superpose plots :
+
+```r
 my_superposed_plot_2 <-
   my_plot_fun(my_interv_weekDAYS_means) +
     geom_line(aes(x=interval, y=steps, colour="Weekdays")) +
     geom_line(data = my_interv_weekENDS_means, aes(x=interval, y=steps, colour="Weekends"),  color = "red") +
     scale_color_manual(name = "Steps", values = c("Weekdays" = "black", "Weekends" = "red")) + theme(legend.position = "bottom") +
    ggtitle("Comparaison between weekdays and weekends.")
-```
-
-7. Print plots
-
-```r
 print(my_superposed_plot_2)
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-27-1.png)<!-- -->
+![](PA1_template_files/figure-html/unnamed-chunk-28-1.png)<!-- -->
 
-10. Another case can be when interval with a number of steps less than 5 are deleted.
+
+
+9. Another case can be when interval with a number of steps less than 5 are deleted.
 
 ```r
 # Subset only the interval with unless 5 steps every 5 minutes
@@ -395,15 +412,15 @@ my_superposed_plot_3 <-
    ggtitle("Comparaison between weekdays and weekends with subset.")
 ```
 
-11. Print the two other plots
+10. Print the two other plots
 
 ```r
 print(my_superposed_plot_3)
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-29-1.png)<!-- -->
+![](PA1_template_files/figure-html/unnamed-chunk-30-1.png)<!-- -->
 <br>
-12. EXTRA : comparison between weekdays and weekend per hour
+11. EXTRA : comparison between weekdays and weekend per hour
 
 ```r
 # Data frame to store values
@@ -507,5 +524,5 @@ for (i in 2:25) {
 }
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-30-1.png)<!-- -->![](PA1_template_files/figure-html/unnamed-chunk-30-2.png)<!-- -->![](PA1_template_files/figure-html/unnamed-chunk-30-3.png)<!-- -->![](PA1_template_files/figure-html/unnamed-chunk-30-4.png)<!-- -->![](PA1_template_files/figure-html/unnamed-chunk-30-5.png)<!-- -->![](PA1_template_files/figure-html/unnamed-chunk-30-6.png)<!-- -->![](PA1_template_files/figure-html/unnamed-chunk-30-7.png)<!-- -->![](PA1_template_files/figure-html/unnamed-chunk-30-8.png)<!-- -->![](PA1_template_files/figure-html/unnamed-chunk-30-9.png)<!-- -->![](PA1_template_files/figure-html/unnamed-chunk-30-10.png)<!-- -->![](PA1_template_files/figure-html/unnamed-chunk-30-11.png)<!-- -->![](PA1_template_files/figure-html/unnamed-chunk-30-12.png)<!-- -->![](PA1_template_files/figure-html/unnamed-chunk-30-13.png)<!-- -->![](PA1_template_files/figure-html/unnamed-chunk-30-14.png)<!-- -->![](PA1_template_files/figure-html/unnamed-chunk-30-15.png)<!-- -->![](PA1_template_files/figure-html/unnamed-chunk-30-16.png)<!-- -->![](PA1_template_files/figure-html/unnamed-chunk-30-17.png)<!-- -->![](PA1_template_files/figure-html/unnamed-chunk-30-18.png)<!-- -->![](PA1_template_files/figure-html/unnamed-chunk-30-19.png)<!-- -->![](PA1_template_files/figure-html/unnamed-chunk-30-20.png)<!-- -->![](PA1_template_files/figure-html/unnamed-chunk-30-21.png)<!-- -->![](PA1_template_files/figure-html/unnamed-chunk-30-22.png)<!-- -->![](PA1_template_files/figure-html/unnamed-chunk-30-23.png)<!-- -->![](PA1_template_files/figure-html/unnamed-chunk-30-24.png)<!-- -->
+![](PA1_template_files/figure-html/unnamed-chunk-31-1.png)<!-- -->![](PA1_template_files/figure-html/unnamed-chunk-31-2.png)<!-- -->![](PA1_template_files/figure-html/unnamed-chunk-31-3.png)<!-- -->![](PA1_template_files/figure-html/unnamed-chunk-31-4.png)<!-- -->![](PA1_template_files/figure-html/unnamed-chunk-31-5.png)<!-- -->![](PA1_template_files/figure-html/unnamed-chunk-31-6.png)<!-- -->![](PA1_template_files/figure-html/unnamed-chunk-31-7.png)<!-- -->![](PA1_template_files/figure-html/unnamed-chunk-31-8.png)<!-- -->![](PA1_template_files/figure-html/unnamed-chunk-31-9.png)<!-- -->![](PA1_template_files/figure-html/unnamed-chunk-31-10.png)<!-- -->![](PA1_template_files/figure-html/unnamed-chunk-31-11.png)<!-- -->![](PA1_template_files/figure-html/unnamed-chunk-31-12.png)<!-- -->![](PA1_template_files/figure-html/unnamed-chunk-31-13.png)<!-- -->![](PA1_template_files/figure-html/unnamed-chunk-31-14.png)<!-- -->![](PA1_template_files/figure-html/unnamed-chunk-31-15.png)<!-- -->![](PA1_template_files/figure-html/unnamed-chunk-31-16.png)<!-- -->![](PA1_template_files/figure-html/unnamed-chunk-31-17.png)<!-- -->![](PA1_template_files/figure-html/unnamed-chunk-31-18.png)<!-- -->![](PA1_template_files/figure-html/unnamed-chunk-31-19.png)<!-- -->![](PA1_template_files/figure-html/unnamed-chunk-31-20.png)<!-- -->![](PA1_template_files/figure-html/unnamed-chunk-31-21.png)<!-- -->![](PA1_template_files/figure-html/unnamed-chunk-31-22.png)<!-- -->![](PA1_template_files/figure-html/unnamed-chunk-31-23.png)<!-- -->![](PA1_template_files/figure-html/unnamed-chunk-31-24.png)<!-- -->
 
